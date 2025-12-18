@@ -1,0 +1,39 @@
+name: Deploy to IIS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      # Step 1 — Checkout the latest code from your main branch
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 2 — Deploy to wwwroot
+      - name: Deploy to wwwroot
+        run: |
+          $target = "C:\inetpub\wwwroot"
+
+          # Remove all existing files (optional but recommended for clean deploy)
+          if (Test-Path $target) {
+            Get-ChildItem -Path $target -Recurse -Force | Remove-Item -Force -Recurse
+          } else {
+            New-Item -ItemType Directory -Path $target | Out-Null
+          }
+
+          # Copy all files from the repo to wwwroot
+          Copy-Item -Path "$env:GITHUB_WORKSPACE\*" -Destination $target -Recurse -Force
+)
+-Go to github in-settings-action-runners-
+-new self-hosted runner-paste this command-
+-mkdir actions-runner; cd actions-runner
+-Invoke-WebRequest -Uri https://github.com/actions/runner/releases/download/v2.328.0/actions-runner-win-x64-2.328.0.zip -OutFile actions-runner-win-x64-2.328.0.zip
+-if((Get-FileHash -Path actions-runner-win-x64-2.328.0.zip -Algorithm SHA256).Hash.ToUpper() -ne 'a73ae192b8b2b782e1d90c08923030930b0b96ed394fe56413a073cc6f694877'.ToUpper()){ throw 'Computed checksum did not match' }
+-Add-Type -AssemblyName System.IO.Compression.FileSystem ; [System.IO.Compression.ZipFile]::ExtractToDirectory("$PWD/actions-runner-win-x64-2.328.0.zip", "$PWD")
+-./config.cmd --url https://github.com/bhoomi715/devops --token BK362HGQR7KUSCS6MWU3METI4VFBA
+-./run.cmd
